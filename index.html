@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostFixer — Infix to Postfix Converter & Trace Table</title>
+  <meta name="description" content="Instant infix to postfix (Reverse Polish) converter with a step-by-step token, stack, and postfix trace table for DSA students and instructors.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation / Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <img src="favicon.png" alt="PostFixer Logo" width="36" height="36" style="border-radius: 8px; display: block;">
+        </div>
+        <div class="brand-title">
+          <h1>PostFixer</h1>
+          <span class="badge">DSA Tool</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Live Visitor Counter Badge -->
+        <div class="visitor-badge" id="visitor-badge" title="Total site visits">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span class="visitor-label">Visits:</span>
+          <span id="visitor-count" class="visitor-count">...</span>
+        </div>
+
+        <!-- Dark/Light Theme Toggle -->
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle light and dark mode">
+          <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Hero / Input Section -->
+      <section class="hero-section">
+        <h2 class="hero-title">Infix to Postfix Converter</h2>
+        <p class="hero-subtitle">Convert infix expressions into Reverse Polish Notation with a complete textbook <strong>Token / Stack / Postfix</strong> trace table.</p>
+
+        <form id="postfix-form" class="input-form" onsubmit="return false;">
+          <div class="input-group">
+            <label for="expression-input" class="sr-only">Infix Expression</label>
+            <div class="input-wrapper">
+              <input 
+                type="text" 
+                id="expression-input" 
+                class="expression-input" 
+                placeholder="e.g. (A+B)*(C-D)" 
+                autocomplete="off" 
+                spellcheck="false"
+                aria-describedby="error-message"
+              >
+              <button type="button" id="clear-input-btn" class="clear-input-btn hidden" aria-label="Clear input">&times;</button>
+            </div>
+            <button type="submit" id="convert-btn" class="convert-btn">
+              <span>Convert</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Inline Error Banner -->
+          <div id="error-message" class="error-banner hidden" role="alert">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span id="error-text"></span>
+          </div>
+
+          <!-- Preset Examples -->
+          <div class="examples-container">
+            <span class="examples-label">Try an example:</span>
+            <div class="example-chips">
+              <button type="button" class="example-chip" data-expr="14/7*3-4+9/2">14/7*3-4+9/2</button>
+              <button type="button" class="example-chip" data-expr="A*B+C/D">A*B+C/D</button>
+              <button type="button" class="example-chip" data-expr="(A+B)*(C-D)">(A+B)*(C-D)</button>
+              <button type="button" class="example-chip" data-expr="A+B*C-D">A+B*C-D</button>
+              <button type="button" class="example-chip" data-expr="A^B^C">A^B^C</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Results & Step Trace Section -->
+      <section id="results-section" class="results-section hidden">
+        <div class="results-header">
+          <div class="results-title-group">
+            <h3>Algorithm Trace Table</h3>
+            <span class="expr-tag" id="current-expr-tag">Infix: A*B+C/D</span>
+          </div>
+
+          <!-- Trace Controls -->
+          <div class="player-controls">
+            <div class="mode-toggle">
+              <button type="button" id="mode-all-btn" class="mode-btn active">All Rows</button>
+              <button type="button" id="mode-step-btn" class="mode-btn">Step-by-Step</button>
+            </div>
+
+            <div id="step-player-bar" class="step-player-bar hidden">
+              <button type="button" id="step-prev-btn" class="player-btn" title="Previous Step" aria-label="Previous step">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+              <button type="button" id="step-play-btn" class="player-btn play-btn" title="Auto Play / Pause" aria-label="Play or pause auto step animation">
+                <svg class="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <svg class="pause-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+              </button>
+              <button type="button" id="step-next-btn" class="player-btn" title="Next Step" aria-label="Next step">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+              <span id="step-indicator" class="step-indicator">Step 1 / 1</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trace Table -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table id="trace-table" class="trace-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="col-step">#</th>
+                  <th scope="col" class="col-token">Standard Token</th>
+                  <th scope="col" class="col-stack">Stack</th>
+                  <th scope="col" class="col-postfix">Postfix</th>
+                </tr>
+              </thead>
+              <tbody id="trace-tbody">
+                <!-- Table rows populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Output Box: Final Postfix Result -->
+        <div class="output-card">
+          <div class="output-content">
+            <div class="output-meta">
+              <span class="output-label">Final Postfix Result</span>
+              <span class="output-sub">Reverse Polish Notation</span>
+            </div>
+            <div class="output-result-wrapper">
+              <div id="final-postfix" class="final-postfix-text"></div>
+              <div class="output-actions">
+                <button type="button" id="reset-btn" class="action-btn reset-btn" title="Reset all input and trace">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                  </svg>
+                  <span>Reset</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Syntax & Algorithm Reference Card -->
+      <section class="reference-section">
+        <h3 class="reference-title">Syntax & Rules Reference</h3>
+        <div class="reference-grid">
+          <!-- Table of Precedence -->
+          <div class="ref-card">
+            <h4>Operator Precedence & Associativity</h4>
+            <div class="ref-table-wrapper">
+              <table class="ref-table">
+                <thead>
+                  <tr>
+                    <th>Operator</th>
+                    <th>Precedence</th>
+                    <th>Associativity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>^</code></td>
+                    <td><span class="prec-tag prec-high">3 (Highest)</span></td>
+                    <td>Right</td>
+                  </tr>
+                  <tr>
+                    <td><code>*</code> <code>/</code></td>
+                    <td><span class="prec-tag prec-mid">2</span></td>
+                    <td>Left</td>
+                  </tr>
+                  <tr>
+                    <td><code>+</code> <code>-</code></td>
+                    <td><span class="prec-tag prec-low">1</span></td>
+                    <td>Left</td>
+                  </tr>
+                  <tr>
+                    <td><code>(</code> <code>)</code></td>
+                    <td><span class="prec-tag prec-special">0 (Special)</span></td>
+                    <td>N/A</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Accepted Grammar & Algorithm Rules -->
+          <div class="ref-card ref-card-scrollable">
+            <h4>Grammar & Conventions</h4>
+            <div class="ref-card-body">
+              <ul class="rules-list">
+                <li><strong>Operands:</strong> Single characters <code>A–Z</code>, <code>a–z</code>, and digits <code>0–9</code>.</li>
+                <li><strong>Operators:</strong> <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code>, <code>(</code>, <code>)</code>.</li>
+              </ul>
+              
+              <h5 class="algo-title">Conversion Algorithm Steps</h5>
+              <ol class="algo-steps-list">
+                <li>Initialize an empty stack for operators. Add <code>'('</code> into the stack and <code>')'</code> to the infix expression.</li>
+                <li>Initialize an empty list/array for the output (postfix expression).</li>
+                <li>Start scanning the tokens/characters of the infix expression from left to right.</li>
+                <li>For each token in the infix expression:
+                  <ol type="a" class="sub-steps-list">
+                    <li>If the token is an operand:- <strong>Append it to the output.</strong></li>
+                    <li>If the token is an operator (op1):
+                      <ul class="bullet-sub-list">
+                        <li>While there is an operator (op2) at the top of the stack with greater precedence, or equal precedence and op1 is left-associative, then pop op2 from the stack and append it to the output.</li>
+                        <li>Push op1 onto the stack.</li>
+                      </ul>
+                    </li>
+                    <li>If the token is a left parenthesis <code>'('</code>: Push it onto the stack.</li>
+                    <li>If the token is a right parenthesis <code>')'</code>:
+                      <ul class="bullet-sub-list">
+                        <li>Pop operators from the stack and append to output until a left parenthesis is encountered.</li>
+                        <li>Pop and discard the left parenthesis.</li>
+                      </ul>
+                    </li>
+                  </ol>
+                </li>
+                <li>Repeat step 3 and 4 until the stack becomes empty.</li>
+                <li>Return the output list as the postfix expression.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>PostFixer &mdash; Standard Stack Algorithm Trace for Data Structures & Algorithms</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
