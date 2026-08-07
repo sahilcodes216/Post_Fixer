@@ -75,5 +75,5 @@ PostFixer/
 ```
 
 ---
-### Author
+## ✍️ Author
 ~ Sahil Verma
