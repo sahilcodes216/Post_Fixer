@@ -83,6 +83,3 @@ PostFixer/
 
 ---
 
-## 📄 License
-
-Distributed under the MIT License. Built for computer science students and instructors worldwide.
