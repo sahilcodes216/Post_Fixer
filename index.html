@@ -63,8 +63,26 @@
     <main class="main-content">
       <!-- Hero / Input Section -->
       <section class="hero-section">
-        <h2 class="hero-title">Infix to Postfix Converter</h2>
-        <p class="hero-subtitle">Convert infix expressions into Reverse Polish Notation with a complete textbook <strong>Token / Stack / Postfix</strong> trace table.</p>
+        <!-- Mode Switcher: Postfix vs Prefix -->
+        <div class="converter-mode-container">
+          <div class="segmented-control" role="tablist" aria-label="Converter Mode Switcher">
+            <button type="button" id="mode-postfix-btn" class="segmented-btn active" role="tab" aria-selected="true" data-mode="postfix">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+              <span>Infix to Postfix</span>
+            </button>
+            <button type="button" id="mode-prefix-btn" class="segmented-btn" role="tab" aria-selected="false" data-mode="prefix">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              <span>Infix to Prefix</span>
+            </button>
+          </div>
+        </div>
+
+        <h2 id="hero-title" class="hero-title">Infix to Postfix Converter</h2>
+        <p id="hero-subtitle" class="hero-subtitle">Convert infix expressions into Reverse Polish Notation with a complete textbook <strong>Token / Stack / Postfix</strong> trace table.</p>
 
         <form id="postfix-form" class="input-form" onsubmit="return false;">
           <div class="input-group">
@@ -104,6 +122,7 @@
           <div class="examples-container">
             <span class="examples-label">Try an example:</span>
             <div class="example-chips">
+              <button type="button" class="example-chip" data-expr="9-((3*4)+8)/4">9-((3*4)+8)/4</button>
               <button type="button" class="example-chip" data-expr="14/7*3-4+9/2">14/7*3-4+9/2</button>
               <button type="button" class="example-chip" data-expr="A*B+C/D">A*B+C/D</button>
               <button type="button" class="example-chip" data-expr="(A+B)*(C-D)">(A+B)*(C-D)</button>
@@ -116,9 +135,36 @@
 
       <!-- Results & Step Trace Section -->
       <section id="results-section" class="results-section hidden">
+        <!-- Step 1 Card for Prefix Mode -->
+        <div id="prefix-step1-card" class="prefix-step-card hidden">
+          <div class="step-card-header">
+            <span class="step-badge">Step 1</span>
+            <h4>Reverse the Infix Expression</h4>
+          </div>
+          <div class="step-card-body">
+            <div class="expr-transform-row">
+              <div class="expr-transform-box">
+                <span class="transform-label">Original Infix Expression:</span>
+                <code id="prefix-orig-expr" class="transform-code"></code>
+              </div>
+              <div class="transform-arrow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </div>
+              <div class="expr-transform-box highlight">
+                <span class="transform-label">Reversed Infix (with swapped parentheses):</span>
+                <code id="prefix-rev-expr" class="transform-code"></code>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="results-header">
           <div class="results-title-group">
-            <h3>Algorithm Trace Table</h3>
+            <span id="step2-badge" class="step-badge hidden">Step 2</span>
+            <h3 id="trace-table-title">Algorithm Trace Table</h3>
             <span class="expr-tag" id="current-expr-tag">Infix: A*B+C/D</span>
           </div>
 
@@ -152,9 +198,9 @@
               <thead>
                 <tr>
                   <th scope="col" class="col-step">#</th>
-                  <th scope="col" class="col-token">Standard Token</th>
+                  <th scope="col" class="col-token">Scanned Token</th>
                   <th scope="col" class="col-stack">Stack</th>
-                  <th scope="col" class="col-postfix">Postfix</th>
+                  <th scope="col" id="trace-result-header" class="col-postfix">Postfix</th>
                 </tr>
               </thead>
               <tbody id="trace-tbody">
@@ -164,12 +210,28 @@
           </div>
         </div>
 
-        <!-- Output Box: Final Postfix Result -->
+        <!-- Step 3 Card for Prefix Mode -->
+        <div id="prefix-step3-card" class="prefix-step-card hidden">
+          <div class="step-card-header">
+            <span class="step-badge">Step 3</span>
+            <h4>Reverse the Postfix Expression to Get Prefix</h4>
+          </div>
+          <div class="step-card-body">
+            <div class="expr-transform-row">
+              <div class="expr-transform-box">
+                <span class="transform-label">Reversed Expression Postfix Result:</span>
+                <code id="prefix-intermediate-postfix" class="transform-code"></code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Box: Final Postfix / Prefix Result Container -->
         <div class="output-card">
           <div class="output-content">
             <div class="output-meta">
-              <span class="output-label">Final Postfix Result</span>
-              <span class="output-sub">Reverse Polish Notation</span>
+              <span id="final-result-label" class="output-label">Final Postfix Result</span>
+              <span id="final-result-sub" class="output-sub">Reverse Polish Notation</span>
             </div>
             <div class="output-result-wrapper">
               <div id="final-postfix" class="final-postfix-text"></div>
@@ -185,6 +247,41 @@
             </div>
           </div>
         </div>
+
+        <!-- Postfix Evaluation Verification Table (Only for numeric expressions) -->
+        <div id="eval-section" class="eval-card collapsed hidden">
+          <div class="eval-header-wrapper">
+            <button type="button" id="eval-toggle-btn" class="eval-toggle-btn" aria-expanded="false" aria-controls="eval-content" title="Toggle verification table collapse">
+              <div class="eval-title-group">
+                <svg class="chevron-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                <h4 id="eval-card-title">Verification by Evaluating the Postfix Expression</h4>
+              </div>
+              <div id="eval-final-badge" class="eval-result-badge">
+                <span>Result = </span>
+                <strong id="eval-final-val">0</strong>
+              </div>
+            </button>
+          </div>
+          <div id="eval-content" class="eval-content hidden">
+            <div class="table-card" style="margin-top: 0.75rem;">
+              <div class="table-responsive">
+                <table id="eval-table" class="trace-table">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="col-token">Scanned Token</th>
+                      <th scope="col" class="col-stack">Stack</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eval-tbody">
+                    <!-- Evaluation steps populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- Syntax & Algorithm Reference Card -->
@@ -193,36 +290,31 @@
         <div class="reference-grid">
           <!-- Table of Precedence -->
           <div class="ref-card">
-            <h4>Operator Precedence & Associativity</h4>
+            <h4>Operator Precedence</h4>
             <div class="ref-table-wrapper">
               <table class="ref-table">
                 <thead>
                   <tr>
                     <th>Operator</th>
                     <th>Precedence</th>
-                    <th>Associativity</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td><code>^</code></td>
                     <td><span class="prec-tag prec-high">3 (Highest)</span></td>
-                    <td>Right</td>
                   </tr>
                   <tr>
                     <td><code>*</code> <code>/</code></td>
                     <td><span class="prec-tag prec-mid">2</span></td>
-                    <td>Left</td>
                   </tr>
                   <tr>
                     <td><code>+</code> <code>-</code></td>
                     <td><span class="prec-tag prec-low">1</span></td>
-                    <td>Left</td>
                   </tr>
                   <tr>
                     <td><code>(</code> <code>)</code></td>
                     <td><span class="prec-tag prec-special">0 (Special)</span></td>
-                    <td>N/A</td>
                   </tr>
                 </tbody>
               </table>
@@ -231,14 +323,14 @@
 
           <!-- Accepted Grammar & Algorithm Rules -->
           <div class="ref-card ref-card-scrollable">
-            <h4>Grammar & Conventions</h4>
+            <h4>All Algorithms & Rules</h4>
             <div class="ref-card-body">
               <ul class="rules-list">
                 <li><strong>Operands:</strong> Single characters <code>A–Z</code>, <code>a–z</code>, and digits <code>0–9</code>.</li>
                 <li><strong>Operators:</strong> <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code>, <code>(</code>, <code>)</code>.</li>
               </ul>
               
-              <h5 class="algo-title">Conversion Algorithm Steps</h5>
+              <h5 class="algo-title">Algorithm for Infix to Postfix Conversion:</h5>
               <ol class="algo-steps-list">
                 <li>Initialize an empty stack for operators. Add <code>'('</code> into the stack and <code>')'</code> to the infix expression.</li>
                 <li>Initialize an empty list/array for the output (postfix expression).</li>
@@ -264,6 +356,33 @@
                 <li>Repeat step 3 and 4 until the stack becomes empty.</li>
                 <li>Return the output list as the postfix expression.</li>
               </ol>
+
+              <h5 class="algo-title">Algorithm for Postfix Expression Evaluation</h5>
+              <ol class="algo-steps-list">
+                <li><strong>Initialize</strong> an empty stack.</li>
+                <li><strong>Scan</strong> the postfix expression from left to right, one token at a time.</li>
+                <li><strong>For each token:</strong>
+                  <ul class="bullet-sub-list">
+                    <li><strong>If it's an operand</strong> &rarr; push it onto the stack.</li>
+                    <li><strong>If it's an operator (<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>)</strong> &rarr;
+                      <ul class="bullet-sub-list">
+                        <li>Pop the top two values: <code>operand2 = pop()</code>, then <code>operand1 = pop()</code></li>
+                        <li>Compute: <code>result = operand1 operator operand2</code></li>
+                        <li>Push <code>result</code> back onto the stack.</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li><strong>Repeat</strong> step 3 until all tokens are scanned.</li>
+                <li><strong>Return</strong> the final value left on the stack &mdash; this is the result.</li>
+              </ol>
+
+              <h5 class="algo-title">Algorithm for Infix to Prefix Conversion:</h5>
+              <ol class="algo-steps-list">
+                <li>Reverse the given infix expression. Also swap every <code>(</code> with <code>)</code> and every <code>)</code> with <code>(</code>.</li>
+                <li>Convert the reversed expression into postfix, but for equal-precedence operators, push the new operator on top instead of popping the existing one first. (This keeps the operators in the right order once you reverse everything in step 3.)</li>
+                <li>Reverse the resulting postfix expression. This gives the final prefix expression.</li>
+              </ol>
             </div>
           </div>
         </div>
@@ -273,6 +392,7 @@
     <!-- Footer -->
     <footer class="app-footer">
       <p>PostFixer &mdash; Standard Stack Algorithm Trace for Data Structures & Algorithms</p>
+      <p>--Made with 💙 for Amitians--</p>
     </footer>
   </div>
 

@@ -276,7 +276,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Hero & Input Section
+   Hero Section & Mode Switcher
    -------------------------------------------------------------------------- */
 .hero-section {
   text-align: center;
@@ -285,6 +285,54 @@ body {
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0;
+}
+
+.converter-mode-container {
+  margin-bottom: 0.5rem;
+}
+
+.segmented-control {
+  display: inline-flex;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  box-shadow: var(--shadow-sm);
+  gap: 4px;
+}
+
+.segmented-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1.15rem;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  user-select: none;
+}
+
+.segmented-btn:hover {
+  color: var(--text-primary);
+}
+
+.segmented-btn.active {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
+}
+
+.segmented-btn svg {
+  transition: transform var(--transition-fast);
+}
+
+.segmented-btn.active svg {
+  stroke: #ffffff;
 }
 
 .hero-title {
@@ -820,6 +868,193 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   Prefix Step Cards (Step 1 & Step 3)
+   -------------------------------------------------------------------------- */
+.prefix-step-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.step-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.65rem;
+}
+
+.step-badge {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+}
+
+.step-card-header h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.expr-transform-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.expr-transform-box {
+  flex: 1;
+  min-width: 220px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.expr-transform-box.highlight {
+  border-color: var(--accent-color);
+  background-color: var(--accent-light);
+}
+
+.transform-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.expr-transform-box.highlight .transform-label {
+  color: var(--accent-color);
+}
+
+.transform-code {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.transform-arrow {
+  color: var(--accent-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --------------------------------------------------------------------------
+   Postfix Evaluation Verification Section
+   -------------------------------------------------------------------------- */
+.eval-card {
+  margin-top: 1.25rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.eval-header-wrapper {
+  padding-bottom: 0.25rem;
+}
+
+.eval-toggle-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0.25rem 0;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: opacity var(--transition-fast);
+}
+
+.eval-toggle-btn:hover {
+  opacity: 0.85;
+}
+
+.eval-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.eval-title-group h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.chevron-icon {
+  transition: transform var(--transition-normal);
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+.eval-card.collapsed {
+  padding-bottom: 1rem;
+}
+
+.eval-card.collapsed .chevron-icon {
+  transform: rotate(-90deg);
+}
+
+.eval-content {
+  transition: all var(--transition-normal);
+}
+
+.eval-result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: var(--accent-light);
+  color: var(--accent-color);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid var(--accent-glow);
+}
+
+.eval-result-badge strong {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+}
+
+.eval-explanation {
+  font-style: italic;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-left: 0.35rem;
+  opacity: 0.9;
+}
+
+/* --------------------------------------------------------------------------
    Syntax Reference Section
    -------------------------------------------------------------------------- */
 .reference-section {
@@ -921,7 +1156,7 @@ body {
 
 /* Scrollable Card & Algorithm Steps Styling */
 .ref-card-scrollable {
-  max-height: 280px;
+  max-height: 360px;
   overflow: hidden;
   display: flex;
   flex-direction: column;

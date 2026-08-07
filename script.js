@@ -22,6 +22,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const finalPostfixEl = document.getElementById('final-postfix');
   const resetBtn = document.getElementById('reset-btn');
 
+  // Postfix Evaluation DOM Elements
+  const evalSection = document.getElementById('eval-section');
+  const evalTbody = document.getElementById('eval-tbody');
+  const evalFinalVal = document.getElementById('eval-final-val');
+  const evalToggleBtn = document.getElementById('eval-toggle-btn');
+  const evalContent = document.getElementById('eval-content');
+
+  if (evalToggleBtn && evalContent) {
+    evalToggleBtn.addEventListener('click', () => {
+      const isExpanded = evalToggleBtn.getAttribute('aria-expanded') === 'true';
+      evalToggleBtn.setAttribute('aria-expanded', !isExpanded);
+      evalContent.classList.toggle('hidden', isExpanded);
+      evalSection.classList.toggle('collapsed', isExpanded);
+    });
+  }
+
   // Step Player Controls
   const modeAllBtn = document.getElementById('mode-all-btn');
   const modeStepBtn = document.getElementById('mode-step-btn');
@@ -34,12 +50,89 @@ document.addEventListener('DOMContentLoaded', () => {
   const pauseIcon = stepPlayBtn.querySelector('.pause-icon');
 
   // Application State
+  let converterMode = 'postfix'; // 'postfix' | 'prefix'
   let currentRows = [];
   let currentFinalPostfix = '';
   let currentExpr = '';
   let displayMode = 'all'; // 'all' | 'step'
   let currentStepIndex = 0;
   let playInterval = null;
+
+  // Dynamic Header & Label Elements
+  const heroTitle = document.getElementById('hero-title');
+  const heroSubtitle = document.getElementById('hero-subtitle');
+  const traceResultHeader = document.getElementById('trace-result-header');
+  const finalResultLabel = document.getElementById('final-result-label');
+  const finalResultSub = document.getElementById('final-result-sub');
+  const evalCardTitle = document.getElementById('eval-card-title');
+
+  // Prefix Step Card Elements
+  const prefixStep1Card = document.getElementById('prefix-step1-card');
+  const prefixOrigExpr = document.getElementById('prefix-orig-expr');
+  const prefixRevExpr = document.getElementById('prefix-rev-expr');
+  const step2Badge = document.getElementById('step2-badge');
+  const traceTableTitle = document.getElementById('trace-table-title');
+  const prefixStep3Card = document.getElementById('prefix-step3-card');
+  const prefixIntermediatePostfix = document.getElementById('prefix-intermediate-postfix');
+
+  // Mode Switcher Buttons
+  const modePostfixBtn = document.getElementById('mode-postfix-btn');
+  const modePrefixBtn = document.getElementById('mode-prefix-btn');
+
+  function updateConverterModeUI(mode) {
+    converterMode = mode;
+
+    if (mode === 'postfix') {
+      if (modePostfixBtn) {
+        modePostfixBtn.classList.add('active');
+        modePostfixBtn.setAttribute('aria-selected', 'true');
+      }
+      if (modePrefixBtn) {
+        modePrefixBtn.classList.remove('active');
+        modePrefixBtn.setAttribute('aria-selected', 'false');
+      }
+
+      if (prefixStep1Card) prefixStep1Card.classList.add('hidden');
+      if (prefixStep3Card) prefixStep3Card.classList.add('hidden');
+      if (step2Badge) step2Badge.classList.add('hidden');
+      if (traceTableTitle) traceTableTitle.textContent = 'Algorithm Trace Table';
+
+      if (heroTitle) heroTitle.textContent = 'Infix to Postfix Converter';
+      if (heroSubtitle) heroSubtitle.innerHTML = 'Convert infix expressions into Reverse Polish Notation with a complete textbook <strong>Token / Stack / Postfix</strong> trace table.';
+      if (traceResultHeader) traceResultHeader.textContent = 'Postfix';
+      if (finalResultLabel) finalResultLabel.textContent = 'Final Postfix Result';
+      if (finalResultSub) finalResultSub.textContent = 'Reverse Polish Notation';
+      if (evalCardTitle) evalCardTitle.textContent = 'Verification by Evaluating the Postfix Expression';
+    } else {
+      if (modePrefixBtn) {
+        modePrefixBtn.classList.add('active');
+        modePrefixBtn.setAttribute('aria-selected', 'true');
+      }
+      if (modePostfixBtn) {
+        modePostfixBtn.classList.remove('active');
+        modePostfixBtn.setAttribute('aria-selected', 'false');
+      }
+
+      if (prefixStep1Card) prefixStep1Card.classList.remove('hidden');
+      if (prefixStep3Card) prefixStep3Card.classList.remove('hidden');
+      if (step2Badge) step2Badge.classList.remove('hidden');
+      if (traceTableTitle) traceTableTitle.textContent = 'Convert Reversed Expression to Postfix';
+
+      if (heroTitle) heroTitle.textContent = 'Infix to Prefix Converter';
+      if (heroSubtitle) heroSubtitle.innerHTML = 'Convert infix expressions into Polish Notation with a complete textbook <strong>Token / Stack / Prefix</strong> trace table.';
+      if (traceResultHeader) traceResultHeader.textContent = 'Postfix';
+      if (finalResultLabel) finalResultLabel.textContent = 'Final Prefix Result';
+      if (finalResultSub) finalResultSub.textContent = 'Reverse of Postfix Expression (Polish Notation)';
+      if (evalCardTitle) evalCardTitle.textContent = 'Verification by Evaluating the Prefix Expression';
+    }
+
+    if (expressionInput.value.trim().length > 0 && resultsSection && !resultsSection.classList.contains('hidden')) {
+      handleConvert();
+    }
+  }
+
+  if (modePostfixBtn) modePostfixBtn.addEventListener('click', () => updateConverterModeUI('postfix'));
+  if (modePrefixBtn) modePrefixBtn.addEventListener('click', () => updateConverterModeUI('prefix'));
 
   // --------------------------------------------------------------------------
   // 1. Theme Management
@@ -335,10 +428,149 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
+  // 4b. Infix to Prefix Conversion Algorithm (Reversed Sentinel Mode)
+  // --------------------------------------------------------------------------
+  function convertInfixToPrefix(rawExpr) {
+    const tokens = tokenizeInfix(rawExpr);
+
+    const reversedTokens = [];
+    for (let i = tokens.length - 1; i >= 0; i--) {
+      const tok = tokens[i];
+      if (tok === '(') reversedTokens.push(')');
+      else if (tok === ')') reversedTokens.push('(');
+      else reversedTokens.push(tok);
+    }
+
+    const stack = [];
+    const prefixRev = [];
+    const rows = [];
+
+    const precedence = (op) => {
+      if (op === '^') return 3;
+      if (op === '*' || op === '/') return 2;
+      if (op === '+' || op === '-') return 1;
+      if (op === '(') return 0;
+      return -1;
+    };
+
+    const isOperator = (t) => ['+', '-', '*', '/', '^'].includes(t);
+    const isOperand = (t) => !isOperator(t) && t !== '(' && t !== ')';
+
+    stack.push('(');
+    rows.push({
+      token: '(',
+      type: 'paren',
+      stack: [...stack],
+      postfix: [...prefixRev]
+    });
+
+    for (let i = 0; i < reversedTokens.length; i++) {
+      const tok = reversedTokens[i];
+
+      if (isOperand(tok)) {
+        prefixRev.push(tok);
+        rows.push({
+          token: tok,
+          type: 'operand',
+          stack: [...stack],
+          postfix: [...prefixRev]
+        });
+      } else if (tok === '(') {
+        stack.push(tok);
+        rows.push({
+          token: tok,
+          type: 'paren',
+          stack: [...stack],
+          postfix: [...prefixRev]
+        });
+      } else if (tok === ')') {
+        while (stack.length > 0 && stack[stack.length - 1] !== '(') {
+          prefixRev.push(stack.pop());
+        }
+        if (stack.length > 0) stack.pop();
+        rows.push({
+          token: tok,
+          type: 'paren',
+          stack: [...stack],
+          postfix: [...prefixRev]
+        });
+      } else {
+        let isEqualPrecPushed = false;
+
+        while (
+          stack.length > 0 &&
+          stack[stack.length - 1] !== '(' &&
+          (tok === '^'
+            ? precedence(stack[stack.length - 1]) >= precedence(tok)
+            : precedence(stack[stack.length - 1]) > precedence(tok))
+        ) {
+          prefixRev.push(stack.pop());
+        }
+
+        if (
+          stack.length > 0 &&
+          stack[stack.length - 1] !== '(' &&
+          precedence(stack[stack.length - 1]) === precedence(tok) &&
+          tok !== '^'
+        ) {
+          isEqualPrecPushed = true;
+        }
+
+        stack.push(tok);
+        rows.push({
+          token: tok,
+          type: 'operator',
+          stack: [...stack],
+          postfix: [...prefixRev],
+          explanation: isEqualPrecPushed ? '(pushed, not popped)' : null
+        });
+      }
+    }
+
+    while (stack.length > 0 && stack[stack.length - 1] !== '(') {
+      prefixRev.push(stack.pop());
+    }
+
+    rows.push({
+      token: ')',
+      type: 'paren',
+      stack: [...stack],
+      postfix: [...prefixRev]
+    });
+
+    if (stack.length > 0) stack.pop();
+
+    const finalPrefixArr = [...prefixRev].reverse();
+
+    rows.push({
+      token: 'End',
+      type: 'end',
+      stack: [...stack],
+      postfix: [...prefixRev]
+    });
+
+    return {
+      rows,
+      origInfix: formatPostfix(tokens),
+      revInfix: formatPostfix(reversedTokens),
+      intermediatePostfix: formatPostfix(prefixRev),
+      finalPostfix: formatPostfix(finalPrefixArr)
+    };
+  }
+
+  // --------------------------------------------------------------------------
   // 5. Rendering Engine
   // --------------------------------------------------------------------------
+  let currentResultData = null;
+
   function renderTraceTable(rows, maxStepIndex = rows.length - 1) {
     traceTbody.innerHTML = '';
+
+    if (converterMode === 'prefix' && currentResultData) {
+      if (prefixOrigExpr) prefixOrigExpr.textContent = currentResultData.origInfix || '';
+      if (prefixRevExpr) prefixRevExpr.textContent = currentResultData.revInfix || '';
+      if (prefixIntermediatePostfix) prefixIntermediatePostfix.textContent = currentResultData.intermediatePostfix || '';
+    }
 
     rows.forEach((row, idx) => {
       if (idx > maxStepIndex) return;
@@ -379,7 +611,17 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         const stackWrapper = document.createElement('div');
         stackWrapper.className = 'stack-display';
-        stackWrapper.textContent = row.stack.join('');
+
+        const stackText = document.createTextNode(row.stack.join(''));
+        stackWrapper.appendChild(stackText);
+
+        if (converterMode === 'prefix' && row.explanation) {
+          const expSpan = document.createElement('span');
+          expSpan.className = 'stack-explanation';
+          expSpan.textContent = ` ${row.explanation}`;
+          stackWrapper.appendChild(expSpan);
+        }
+
         tdStack.appendChild(stackWrapper);
       }
 
@@ -401,8 +643,204 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update Output Callout Result
     const currentStepRow = rows[Math.min(maxStepIndex, rows.length - 1)];
-    const finalVal = currentStepRow ? formatPostfix(currentStepRow.postfix) : '';
+    const finalVal = converterMode === 'prefix'
+      ? (currentResultData ? currentResultData.finalPostfix : '')
+      : (currentStepRow ? formatPostfix(currentStepRow.postfix) : '');
     finalPostfixEl.textContent = finalVal || '';
+
+    // Update Evaluation Verification Table (Numeric operands only)
+    if (isNumericExpression(currentExpr)) {
+      evalSection.classList.remove('hidden');
+      if (currentStepRow) {
+        let resultTokens;
+        if (converterMode === 'prefix') {
+          resultTokens = (currentResultData ? currentResultData.finalPostfix : '').split(/\s+/).filter(Boolean);
+        } else {
+          resultTokens = currentStepRow.postfix;
+        }
+        renderEvalTable(resultTokens);
+      }
+    } else {
+      evalSection.classList.add('hidden');
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // 5b. Evaluation Engine (Numeric Expressions Verification)
+  // --------------------------------------------------------------------------
+  function isNumericExpression(rawExpr) {
+    if (!rawExpr) return false;
+    const tokens = tokenizeInfix(rawExpr);
+    const isOperator = (t) => ['+', '-', '*', '/', '^'].includes(t);
+    const isOperand = (t) => typeof t === 'string' && !isOperator(t) && t !== '(' && t !== ')';
+    const operands = tokens.filter(isOperand);
+    return operands.length > 0 && operands.every(op => /^\d+(\.\d+)?$/.test(op));
+  }
+
+  function evaluatePostfix(postfixTokens) {
+    const evalStack = [];
+    const evalRows = [];
+    const isOperator = (t) => ['+', '-', '*', '/', '^'].includes(t);
+
+    for (let i = 0; i < postfixTokens.length; i++) {
+      const tok = postfixTokens[i];
+
+      if (!isOperator(tok)) {
+        evalStack.push(parseFloat(tok));
+        evalRows.push({
+          step: i + 1,
+          token: tok,
+          type: 'operand',
+          stack: [...evalStack]
+        });
+      } else {
+        const b = evalStack.pop();
+        const a = evalStack.pop();
+        let res = 0;
+
+        if (tok === '+') res = a + b;
+        else if (tok === '-') res = a - b;
+        else if (tok === '*') res = a * b;
+        else if (tok === '/') res = (b !== undefined && b !== 0) ? a / b : NaN;
+        else if (tok === '^') res = Math.pow(a, b);
+
+        if (typeof res === 'number' && !Number.isInteger(res) && !isNaN(res)) {
+          res = Math.round(res * 10000) / 10000;
+        }
+
+        evalStack.push(res);
+
+        const opSymbol = tok === '*' ? '×' : (tok === '/' ? '÷' : tok);
+        const explanation = `(popped ${b},${a} → ${a}${opSymbol}${b}=${res})`;
+
+        evalRows.push({
+          step: i + 1,
+          token: tok,
+          type: 'operator',
+          stack: [...evalStack],
+          explanation: explanation
+        });
+      }
+    }
+
+    const finalValue = evalStack.length > 0 ? evalStack[evalStack.length - 1] : '';
+
+    return {
+      rows: evalRows,
+      finalValue: finalValue
+    };
+  }
+
+  function evaluatePrefix(prefixTokens) {
+    const evalStack = [];
+    const evalRows = [];
+    const isOperator = (t) => ['+', '-', '*', '/', '^'].includes(t);
+
+    for (let i = prefixTokens.length - 1; i >= 0; i--) {
+      const tok = prefixTokens[i];
+
+      if (!isOperator(tok)) {
+        evalStack.push(parseFloat(tok));
+        evalRows.push({
+          step: prefixTokens.length - i,
+          token: tok,
+          type: 'operand',
+          stack: [...evalStack]
+        });
+      } else {
+        const a = evalStack.pop();
+        const b = evalStack.pop();
+        let res = 0;
+
+        if (tok === '+') res = a + b;
+        else if (tok === '-') res = a - b;
+        else if (tok === '*') res = a * b;
+        else if (tok === '/') res = (b !== undefined && b !== 0) ? a / b : NaN;
+        else if (tok === '^') res = Math.pow(a, b);
+
+        if (typeof res === 'number' && !Number.isInteger(res) && !isNaN(res)) {
+          res = Math.round(res * 10000) / 10000;
+        }
+
+        evalStack.push(res);
+
+        const opSymbol = tok === '*' ? '×' : (tok === '/' ? '÷' : tok);
+        const explanation = `(popped ${a},${b} → ${a}${opSymbol}${b}=${res})`;
+
+        evalRows.push({
+          step: prefixTokens.length - i,
+          token: tok,
+          type: 'operator',
+          stack: [...evalStack],
+          explanation: explanation
+        });
+      }
+    }
+
+    const finalValue = evalStack.length > 0 ? evalStack[evalStack.length - 1] : '';
+
+    return {
+      rows: evalRows,
+      finalValue: finalValue
+    };
+  }
+
+  function renderEvalTable(resultTokens) {
+    if (!evalTbody) return;
+    evalTbody.innerHTML = '';
+
+    if (!resultTokens || resultTokens.length === 0) {
+      evalFinalVal.textContent = '0';
+      return;
+    }
+
+    const { rows, finalValue } = converterMode === 'prefix'
+      ? evaluatePrefix(resultTokens)
+      : evaluatePostfix(resultTokens);
+
+    evalFinalVal.textContent = (finalValue !== '' && !isNaN(finalValue)) ? finalValue : '0';
+
+    rows.forEach((row) => {
+      const tr = document.createElement('tr');
+
+      // Scanned Token
+      const tdToken = document.createElement('td');
+      tdToken.className = 'col-token';
+      const tokenBadge = document.createElement('span');
+      tokenBadge.className = `token-badge token-${row.type}`;
+      tokenBadge.textContent = row.token;
+      tdToken.appendChild(tokenBadge);
+
+      // Stack
+      const tdStack = document.createElement('td');
+      tdStack.className = 'col-stack';
+      if (row.stack.length === 0) {
+        const emptySpan = document.createElement('span');
+        emptySpan.className = 'stack-empty';
+        emptySpan.textContent = 'ϕ (empty)';
+        tdStack.appendChild(emptySpan);
+      } else {
+        const stackWrapper = document.createElement('div');
+        stackWrapper.className = 'stack-display';
+
+        const stackText = document.createTextNode(row.stack.join(','));
+        stackWrapper.appendChild(stackText);
+
+        if (row.explanation) {
+          const expSpan = document.createElement('span');
+          expSpan.className = 'eval-explanation';
+          expSpan.textContent = ` ${row.explanation}`;
+          stackWrapper.appendChild(expSpan);
+        }
+
+        tdStack.appendChild(stackWrapper);
+      }
+
+      tr.appendChild(tdToken);
+      tr.appendChild(tdStack);
+
+      evalTbody.appendChild(tr);
+    });
   }
 
   function updateStepPlayerUI() {
@@ -462,14 +900,23 @@ document.addEventListener('DOMContentLoaded', () => {
     errorMessage.classList.add('hidden');
 
     const cleanExpr = rawExpr.replace(/\s+/g, '');
-    const result = convertInfixToPostfix(cleanExpr);
+    const result = converterMode === 'prefix'
+      ? convertInfixToPrefix(cleanExpr)
+      : convertInfixToPostfix(cleanExpr);
 
+    currentResultData = result;
     currentRows = result.rows;
     currentFinalPostfix = result.finalPostfix;
     currentExpr = cleanExpr;
 
     currentExprTag.textContent = `Infix: ${cleanExpr}`;
     resultsSection.classList.remove('hidden');
+
+    if (evalToggleBtn && evalContent && evalSection) {
+      evalToggleBtn.setAttribute('aria-expanded', 'false');
+      evalContent.classList.add('hidden');
+      evalSection.classList.add('collapsed');
+    }
 
     if (displayMode === 'all') {
       currentStepIndex = currentRows.length - 1;
@@ -572,7 +1019,14 @@ document.addEventListener('DOMContentLoaded', () => {
     clearInputBtn.classList.add('hidden');
     errorMessage.classList.add('hidden');
     resultsSection.classList.add('hidden');
+    if (evalToggleBtn && evalContent && evalSection) {
+      evalToggleBtn.setAttribute('aria-expanded', 'false');
+      evalContent.classList.add('hidden');
+      evalSection.classList.add('collapsed');
+      evalSection.classList.add('hidden');
+    }
     currentRows = [];
+    currentResultData = null;
     currentFinalPostfix = '';
     currentExpr = '';
     expressionInput.focus();
