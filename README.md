@@ -55,17 +55,10 @@ npx serve .
 
 ## 🌐 Deploying to Hosting Platforms
 
-### 1. GitHub Pages
-1. Push the repository to GitHub.
-2. Go to **Repository Settings** &rarr; **Pages**.
-3. Under **Build and deployment**, select **Deploy from a branch** and choose `main` / `/ (root)`.
-4. Click **Save**. Your site will be live at `https://<username>.github.io/<repo-name>/`.
+### Vercel ✅ *(Live)*
+**Live Demo:** [post-fixer.vercel.app](https://post-fixer.vercel.app/)
 
-### 2. Netlify
-1. Drag and drop the project folder directly into [Netlify Drop](https://app.netlify.com/drop).
-2. Or connect your GitHub repository with build settings left empty.
-
-### 3. Vercel
+This project is already deployed and live on Vercel. To deploy your own copy:
 1. Run `npx vercel` in the project root directory or import the Git repository on Vercel.
 2. Deployment completes automatically with zero configuration.
 
