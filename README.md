@@ -3,9 +3,6 @@
 PostFixer is a lightweight, high-performance static web application that converts infix mathematical expressions into postfix (Reverse Polish) notation. It generates a full textbook **Token / Stack / Postfix** step-by-step trace table used to teach the stack-based conversion algorithm in Data Structures and Algorithms (DSA) courses.
 
 ![PostFixer Banner](https://img.shields.io/badge/PostFixer-DSA%20Tool-blue?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-
----
 
 ## 🌟 Key Features
 
