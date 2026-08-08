@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (traceTableTitle) traceTableTitle.textContent = 'Algorithm Trace Table';
 
       if (heroTitle) heroTitle.textContent = 'Infix to Postfix Converter';
-      if (heroSubtitle) heroSubtitle.innerHTML = 'Convert infix expressions into Reverse Polish Notation with a complete textbook <strong>Token / Stack / Postfix</strong> trace table.';
+      if (heroSubtitle) heroSubtitle.innerHTML = 'Convert infix expressions into Postfix with a complete textbook <strong>Token / Stack / Postfix</strong> trace table.';
       if (traceResultHeader) traceResultHeader.textContent = 'Postfix';
       if (finalResultLabel) finalResultLabel.textContent = 'Final Postfix Result';
       if (finalResultSub) finalResultSub.textContent = 'Reverse Polish Notation';
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (traceTableTitle) traceTableTitle.textContent = 'Convert Reversed Expression to Postfix';
 
       if (heroTitle) heroTitle.textContent = 'Infix to Prefix Converter';
-      if (heroSubtitle) heroSubtitle.innerHTML = 'Convert infix expressions into Polish Notation with a complete textbook <strong>Token / Stack / Prefix</strong> trace table.';
+      if (heroSubtitle) heroSubtitle.innerHTML = 'Convert infix expressions into Prefix with a complete textbook <strong>Token / Stack / Prefix</strong> trace table.';
       if (traceResultHeader) traceResultHeader.textContent = 'Postfix';
       if (finalResultLabel) finalResultLabel.textContent = 'Final Prefix Result';
       if (finalResultSub) finalResultSub.textContent = 'Reverse of Postfix Expression (Polish Notation)';
