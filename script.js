@@ -41,13 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Step Player Controls
   const modeAllBtn = document.getElementById('mode-all-btn');
   const modeStepBtn = document.getElementById('mode-step-btn');
-  const stepPlayerBar = document.getElementById('step-player-bar');
-  const stepPrevBtn = document.getElementById('step-prev-btn');
-  const stepPlayBtn = document.getElementById('step-play-btn');
-  const stepNextBtn = document.getElementById('step-next-btn');
-  const stepIndicator = document.getElementById('step-indicator');
-  const playIcon = stepPlayBtn.querySelector('.play-icon');
-  const pauseIcon = stepPlayBtn.querySelector('.pause-icon');
+  const stepPlayerBarTop = document.getElementById('step-player-bar-top');
+  const stepPlayerContainerBottom = document.getElementById('step-player-container-bottom');
+
+  const stepPrevBtns = document.querySelectorAll('.step-prev-btn');
+  const stepPlayBtns = document.querySelectorAll('.step-play-btn');
+  const stepNextBtns = document.querySelectorAll('.step-next-btn');
+  const stepIndicators = document.querySelectorAll('.step-indicator');
 
   // Application State
   let converterMode = 'postfix'; // 'postfix' | 'prefix'
@@ -846,9 +846,17 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateStepPlayerUI() {
     if (!currentRows || currentRows.length === 0) return;
 
-    stepIndicator.textContent = `Step ${currentStepIndex + 1} / ${currentRows.length}`;
-    stepPrevBtn.disabled = currentStepIndex === 0;
-    stepNextBtn.disabled = currentStepIndex === currentRows.length - 1;
+    stepIndicators.forEach(ind => {
+      ind.textContent = `Step ${currentStepIndex + 1} / ${currentRows.length}`;
+    });
+
+    stepPrevBtns.forEach(btn => {
+      btn.disabled = currentStepIndex === 0;
+    });
+
+    stepNextBtns.forEach(btn => {
+      btn.disabled = currentStepIndex === currentRows.length - 1;
+    });
 
     renderTraceTable(currentRows, currentStepIndex);
 
@@ -863,15 +871,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (playInterval) {
       clearInterval(playInterval);
       playInterval = null;
-      playIcon.classList.remove('hidden');
-      pauseIcon.classList.add('hidden');
+      stepPlayBtns.forEach(btn => {
+        const pIcon = btn.querySelector('.play-icon');
+        const paIcon = btn.querySelector('.pause-icon');
+        if (pIcon) pIcon.classList.remove('hidden');
+        if (paIcon) paIcon.classList.add('hidden');
+      });
     }
   }
 
   function startAutoPlay() {
     stopAutoPlay();
-    playIcon.classList.add('hidden');
-    pauseIcon.classList.remove('hidden');
+    stepPlayBtns.forEach(btn => {
+      const pIcon = btn.querySelector('.play-icon');
+      const paIcon = btn.querySelector('.pause-icon');
+      if (pIcon) pIcon.classList.add('hidden');
+      if (paIcon) paIcon.classList.remove('hidden');
+    });
 
     playInterval = setInterval(() => {
       if (currentStepIndex < currentRows.length - 1) {
@@ -920,9 +936,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (displayMode === 'all') {
       currentStepIndex = currentRows.length - 1;
+      if (stepPlayerBarTop) stepPlayerBarTop.classList.add('hidden');
+      if (stepPlayerContainerBottom) stepPlayerContainerBottom.classList.add('hidden');
       renderTraceTable(currentRows);
     } else {
       currentStepIndex = 0;
+      if (stepPlayerBarTop) stepPlayerBarTop.classList.remove('hidden');
+      if (stepPlayerContainerBottom) stepPlayerContainerBottom.classList.remove('hidden');
       updateStepPlayerUI();
     }
 
@@ -965,7 +985,8 @@ document.addEventListener('DOMContentLoaded', () => {
     displayMode = 'all';
     modeAllBtn.classList.add('active');
     modeStepBtn.classList.remove('active');
-    stepPlayerBar.classList.add('hidden');
+    if (stepPlayerBarTop) stepPlayerBarTop.classList.add('hidden');
+    if (stepPlayerContainerBottom) stepPlayerContainerBottom.classList.add('hidden');
     stopAutoPlay();
     if (currentRows.length > 0) {
       currentStepIndex = currentRows.length - 1;
@@ -977,7 +998,8 @@ document.addEventListener('DOMContentLoaded', () => {
     displayMode = 'step';
     modeStepBtn.classList.add('active');
     modeAllBtn.classList.remove('active');
-    stepPlayerBar.classList.remove('hidden');
+    if (stepPlayerBarTop) stepPlayerBarTop.classList.remove('hidden');
+    if (stepPlayerContainerBottom) stepPlayerContainerBottom.classList.remove('hidden');
     if (currentRows.length > 0) {
       currentStepIndex = 0;
       updateStepPlayerUI();
@@ -985,31 +1007,37 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Step Player Controls
-  stepPrevBtn.addEventListener('click', () => {
-    stopAutoPlay();
-    if (currentStepIndex > 0) {
-      currentStepIndex--;
-      updateStepPlayerUI();
-    }
-  });
-
-  stepNextBtn.addEventListener('click', () => {
-    stopAutoPlay();
-    if (currentStepIndex < currentRows.length - 1) {
-      currentStepIndex++;
-      updateStepPlayerUI();
-    }
-  });
-
-  stepPlayBtn.addEventListener('click', () => {
-    if (playInterval) {
+  stepPrevBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
       stopAutoPlay();
-    } else {
-      if (currentStepIndex >= currentRows.length - 1) {
-        currentStepIndex = 0;
+      if (currentStepIndex > 0) {
+        currentStepIndex--;
+        updateStepPlayerUI();
       }
-      startAutoPlay();
-    }
+    });
+  });
+
+  stepNextBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      stopAutoPlay();
+      if (currentStepIndex < currentRows.length - 1) {
+        currentStepIndex++;
+        updateStepPlayerUI();
+      }
+    });
+  });
+
+  stepPlayBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (playInterval) {
+        stopAutoPlay();
+      } else {
+        if (currentStepIndex >= currentRows.length - 1) {
+          currentStepIndex = 0;
+        }
+        startAutoPlay();
+      }
+    });
   });
 
   // Reset Button
@@ -1019,6 +1047,8 @@ document.addEventListener('DOMContentLoaded', () => {
     clearInputBtn.classList.add('hidden');
     errorMessage.classList.add('hidden');
     resultsSection.classList.add('hidden');
+    if (stepPlayerBarTop) stepPlayerBarTop.classList.add('hidden');
+    if (stepPlayerContainerBottom) stepPlayerContainerBottom.classList.add('hidden');
     if (evalToggleBtn && evalContent && evalSection) {
       evalToggleBtn.setAttribute('aria-expanded', 'false');
       evalContent.classList.add('hidden');

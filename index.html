@@ -175,18 +175,12 @@
               <button type="button" id="mode-step-btn" class="mode-btn">Step-by-Step</button>
             </div>
 
-            <div id="step-player-bar" class="step-player-bar hidden">
-              <button type="button" id="step-prev-btn" class="player-btn" title="Previous Step" aria-label="Previous step">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-              </button>
-              <button type="button" id="step-play-btn" class="player-btn play-btn" title="Auto Play / Pause" aria-label="Play or pause auto step animation">
+            <div id="step-player-bar-top" class="step-player-bar hidden">
+              <button type="button" class="player-btn play-btn step-play-btn" title="Auto Play / Pause" aria-label="Play or pause auto step animation">
                 <svg class="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 <svg class="pause-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
               </button>
-              <button type="button" id="step-next-btn" class="player-btn" title="Next Step" aria-label="Next step">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-              </button>
-              <span id="step-indicator" class="step-indicator">Step 1 / 1</span>
+              <span class="step-indicator">Step 1 / 1</span>
             </div>
           </div>
         </div>
@@ -207,6 +201,19 @@
                 <!-- Table rows populated dynamically -->
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- Step-by-Step Player Controls (In between Algorithm Trace Table and Final Postfix Result) -->
+        <div id="step-player-container-bottom" class="step-player-container-bottom hidden">
+          <div id="step-player-bar-bottom" class="step-player-bar">
+            <button type="button" class="player-btn step-prev-btn" title="Previous Step" aria-label="Previous step">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <button type="button" class="player-btn step-next-btn" title="Next Step" aria-label="Next step">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+            <span class="step-indicator">Step 1 / 1</span>
           </div>
         </div>
 

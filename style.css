@@ -574,20 +574,31 @@ body {
   color: #ffffff;
 }
 
-.step-player-bar {
+.step-player-container-bottom {
   display: flex;
+  justify-content: flex-start;
   align-items: center;
-  gap: 0.4rem;
+  margin-top: 0.85rem;
+  margin-bottom: 0.5rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.step-player-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 3px 6px;
+  padding: 6px 12px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
 }
 
 .player-btn {
-  width: 30px;
-  height: 30px;
-  border: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color);
   background: var(--bg-card-hover);
   color: var(--text-primary);
   border-radius: var(--radius-sm);
@@ -601,29 +612,35 @@ body {
 .player-btn:hover:not(:disabled) {
   background-color: var(--accent-light);
   color: var(--accent-color);
+  border-color: var(--border-focus);
 }
 
 .player-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .play-btn {
   background-color: var(--accent-color);
   color: #ffffff;
+  border-color: var(--accent-color);
+  box-shadow: 0 2px 8px var(--accent-glow);
 }
 
 .play-btn:hover:not(:disabled) {
   background-color: var(--accent-hover);
   color: #ffffff;
+  border-color: var(--accent-hover);
+  box-shadow: 0 4px 12px var(--accent-glow);
 }
 
 .step-indicator {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 600;
   padding: 0 0.5rem;
-  color: var(--text-secondary);
+  color: var(--accent-hover);
+  white-space: nowrap;
 }
 
 /* --------------------------------------------------------------------------
